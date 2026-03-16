@@ -1,30 +1,44 @@
-// src/middleware/auth.middleware.ts
-import { Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { env } from '../config/env';
-import { AuthRequest, AuthPayload } from '../types';
+import { Request, Response, NextFunction } from 'express';
+import { verifyToken } from '../utils/jwt.util';
 
-export function authMiddleware(
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): void {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader?.startsWith('Bearer ')
-    ? authHeader.slice(7)
-    : undefined;
+/**
+ * Auth Middleware: Proteksi route agar hanya bisa diakses user dengan token valid.
+ * Sesuai roadmap Phase 1 Order 1.4.
+ */
+export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
+  const authHeader = req.headers.authorization;
 
-  if (!token) {
-    res.status(401).json({ message: 'No token provided' });
+  // Check format Authorization: Bearer <token>
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    res.status(401).json({ 
+      status: 'error',
+      message: 'Unauthorized: No token provided' 
+    });
     return;
   }
 
+  const token = authHeader.split(' ')[1]!;
+
+
   try {
-    const payload = jwt.verify(token, env.jwtSecret) as AuthPayload;
-    req.user = payload;
+    // Menggunakan utilitas terpusat sesuai Phase 0 setup 
+    const payload = verifyToken(token);
+    
+    // Inject data user ke object request (sudah dikenali via express.d.ts)
+    req.user = {
+      id: payload.userId,
+      name: payload.name,
+      email: payload.email,
+    };
+
     next();
   } catch (err) {
+    // Log error secara internal tapi berikan pesan standar ke user
     console.error('JWT verification failed:', err instanceof Error ? err.message : err);
-    res.status(401).json({ message: 'Invalid or expired token' });
+    
+    res.status(401).json({ 
+      status: 'error',
+      message: 'Invalid or expired token' 
+    });
   }
 }

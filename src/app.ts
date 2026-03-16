@@ -2,6 +2,8 @@
 import express from 'express';
 import router from './routes';
 import { errorMiddleware } from './middleware/error.middleware';
+import authRoute from './routes/auth.route';
+import protectedRoute from './routes/protected.route';
 
 const app = express();
 
@@ -16,6 +18,9 @@ app.get("/", (_req, res) => {
 });
 
 app.use('/api', router);
+
+app.use('/api/auth', authRoute);
+app.use('/api/protected', protectedRoute);
 
 app.use(errorMiddleware);
 
