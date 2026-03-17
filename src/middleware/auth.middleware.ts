@@ -1,11 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt.util';
+import { AuthRequest } from '../types';
 
 /**
  * Auth Middleware: Proteksi route agar hanya bisa diakses user dengan token valid.
  * Sesuai roadmap Phase 1 Order 1.4.
  */
 export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
+  const authReq = req as AuthRequest;
   const authHeader = req.headers.authorization;
 
   // Check format Authorization: Bearer <token>
@@ -25,7 +27,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
     const payload = verifyToken(token);
     
     // Inject data user ke object request (sudah dikenali via express.d.ts)
-    req.user = {
+    authReq.user = {
       id: payload.userId,
       name: payload.name,
       email: payload.email,
