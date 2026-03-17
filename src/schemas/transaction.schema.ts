@@ -8,7 +8,7 @@ export const createTransactionSchema = z.object({
       error: "Type must be 'income' or 'expense'",
     }),
     amount: z.number().positive('Amount must be greater than 0'),
-    category_id: z.string().uuid('Invalid category ID format'),
+    category_id: z.uuid('Invalid category ID format'),
     source: z.string().min(1, 'Source is required (e.g., atm, gopay, cash)'),
     description: z.string().optional(),
     transaction_date: z.string().refine((date) => !isNaN(Date.parse(date)), {
