@@ -1,4 +1,34 @@
+# Dependency folders
 node_modules/
 dist/
+build/
+
+# Environment variables (Sangat krusial biar DB URL ga bocor)
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# TypeScript 
+*.tsbuildinfo
 *.js.map
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs
+*.log
+
+# OS Metadata
+.DS_Store
+Thumbs.db
+
+# Prisma
+# Kita ignore folder migrations kalau lu mau pake migration yang fresh di server, 
+# tapi biasanya migrations di-commit. Yang wajib di-ignore adalah:
+/prisma/db
+
+# IDE files
+.vscode/
