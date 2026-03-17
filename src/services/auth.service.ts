@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { prisma } from '../config/prisma';
 import { signToken } from '../utils/jwt.util';
-import { AppError } from '../middleware/error.middleware';
+import { AppError } from '../utils/app.error';
 
 // Sesuai roadmap Phase 1 - Authentication Layer 
 const SALT_ROUNDS = 12;
@@ -36,9 +36,7 @@ export async function registerUser(input: RegisterInput): Promise<AuthResult> {
   });
 
   if (existing) {
-    const error = new Error('Email already in use') as AppError;
-    error.statusCode = 409;
-    throw error;
+    throw new AppError(409, 'Email already in use');
   }
 
   // Hashing password sebelum simpan ke DB 
@@ -69,16 +67,12 @@ export async function loginUser(input: LoginInput): Promise<AuthResult> {
   });
 
   if (!user) {
-    const error = new Error('Invalid email or password') as AppError;
-    error.statusCode = 401;
-    throw error;
+    throw new AppError(401, 'Invalid email or password');
   }
 
   const valid = await bcrypt.compare(input.password, user.passwordHash);
   if (!valid) {
-    const error = new Error('Invalid email or password') as AppError;
-    error.statusCode = 401;
-    throw error;
+    throw new AppError(401, 'Invalid email or password');
   }
 
   const token = signToken({ userId: user.id, email: user.email, name: user.name });

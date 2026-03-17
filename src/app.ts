@@ -6,7 +6,6 @@ import authRoute from './routes/auth.route';
 import protectedRoute from './routes/protected.route';
 
 const app = express();
-
 app.use(express.json());
 
 app.get('/health', (_req, res) => {
