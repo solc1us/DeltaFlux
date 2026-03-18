@@ -8,12 +8,13 @@ const SALT_ROUNDS = 12;
 
 export interface RegisterInput {
   name: string;
+  username: string;
   email: string;
   password: string;
 }
 
 export interface LoginInput {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -21,6 +22,7 @@ export interface AuthResult {
   token: string;
   user: {
     id: string;
+    username: string;
     name: string;
     email: string;
   };
@@ -31,12 +33,17 @@ export interface AuthResult {
  * Menggunakan status code 409 untuk konflik email.
  */
 export async function registerUser(input: RegisterInput): Promise<AuthResult> {
-  const existing = await prisma.user.findUnique({ 
-    where: { email: input.email } 
+  const existing = await prisma.user.findFirst({ 
+    where: { OR: [
+      { email: input.email },
+      { username: input.username }
+    ] } 
   });
 
   if (existing) {
-    throw new AppError(409, 'Email already in use');
+    const message = existing.email === input.email
+      ? 'Email already in use' : 'Username already in use';
+    throw new AppError(409, message);
   }
 
   // Hashing password sebelum simpan ke DB 
@@ -45,14 +52,15 @@ export async function registerUser(input: RegisterInput): Promise<AuthResult> {
   const user = await prisma.user.create({
     data: { 
       name: input.name,
-      email: input.email, 
+      email: input.email,
+      username: input.username,
       passwordHash: password_hash 
     },
-    select: { id: true, email: true, name: true },
+    select: { id: true, email: true, name: true, username: true },
   });
 
   // Generate JWT Token 
-  const token = signToken({ userId: user.id, email: user.email, name: user.name });
+  const token = signToken({ id: user.id, email: user.email, name: user.name, username: user.username });
 
   return { user, token };
 }
@@ -63,26 +71,27 @@ export async function registerUser(input: RegisterInput): Promise<AuthResult> {
  */
 export async function loginUser(input: LoginInput): Promise<AuthResult> {
   const user = await prisma.user.findUnique({ 
-    where: { email: input.email } 
+    where: { username: input.username } 
   });
 
   if (!user) {
-    throw new AppError(401, 'Invalid email or password');
+    throw new AppError(401, 'Invalid username or password');
   }
 
   const valid = await bcrypt.compare(input.password, user.passwordHash);
   if (!valid) {
-    throw new AppError(401, 'Invalid email or password');
+    throw new AppError(401, 'Invalid username or password');
   }
 
-  const token = signToken({ userId: user.id, email: user.email, name: user.name });
+  const token = signToken({ id: user.id, email: user.email, name: user.name, username: user.username });
 
   return {
   token,
   user: { 
     id: user.id, 
     email: user.email, 
-    name: user.name
+    name: user.name,
+    username: user.username 
   },
 };
 }

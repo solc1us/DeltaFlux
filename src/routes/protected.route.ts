@@ -1,19 +1,22 @@
-import { Router, Request, Response } from 'express';
+import { Router, Response } from 'express';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { AuthRequest } from '../types';
+import { AuthenticatedRequest } from '../types';
 
 const router = Router();
 
-router.get('/me', authMiddleware, (req: Request, res: Response) => {
-  const authReq = req as AuthRequest;
+router.get('/me', authMiddleware, (req: AuthenticatedRequest, res: Response) => {
+  const user = req.user;
 
-  if (!authReq.user) {
-    return res.status(401).json({ message: 'User not found in request' });
+  if (!user) {
+    return res.status(401).json({ 
+      status: 'error',
+      message: 'User not found in request' 
+    });
   }
 
   return res.status(200).json({
-    message: 'protected route ok',
-    user: authReq.user,
+    status: 'success',
+    data: { user }
   });
 });
 

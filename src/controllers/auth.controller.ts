@@ -11,22 +11,19 @@ export async function register(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { name, email, password } = req.body;
+    // Destructuring username juga dari body
+    const { name, username, email, password } = req.body;
 
-    // Validasi dasar sebelum masuk service (Nanti diganti Zod di Phase 2)
-    if (!email || !password || !name) {
-      res.status(400).json({ message: 'Name, email, and password are required' });
-      return;
-    }
-
-    const result = await authService.registerUser({ name, email, password });
+    // Gak perlu if (!email...) lagi karena udah dicek Zod di route
+    const result = await authService.registerUser({ name, username, email, password });
     
     res.status(201).json({
       status: 'success',
+      message: 'User registered successfully',
       data: result
     });
   } catch (err) {
-    next(err); // Dilempar ke Global Error Middleware
+    next(err); 
   }
 }
 
@@ -40,20 +37,16 @@ export async function login(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
-    if (!email || !password) {
-      res.status(400).json({ message: 'Email and password are required' });
-      return;
-    }
-
-    const result = await authService.loginUser({ email, password });
+    const result = await authService.loginUser({ username, password });
 
     res.status(200).json({
       status: 'success',
+      message: 'Login successful',
       data: result
     });
   } catch (err) {
-    next(err); // Dilempar ke Global Error Middleware
+    next(err);
   }
 }

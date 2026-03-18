@@ -1,12 +1,14 @@
-// src/types/index.ts
 import { Request } from 'express';
+import { User } from '@prisma/client';
 
 export interface AuthPayload {
   id: string;
-  name: string;
+  username: string;
   email: string;
+  name: string;
 }
 
-export interface AuthRequest extends Request {
-  user?: AuthPayload;
+// Pake ini buat pengganti Request bawaan di tempat yang butuh auth
+export interface AuthenticatedRequest extends Request {
+  user?: User | AuthPayload;
 }

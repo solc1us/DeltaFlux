@@ -1,7 +1,9 @@
 import jwt from 'jsonwebtoken';
+import { AuthPayload } from '../types';
 
 export type JwtPayload = {
-  userId: string;
+  id: string;
+  username: string;
   email: string;
   name: string;
 };
@@ -13,12 +15,12 @@ if (!JWT_SECRET) {
   throw new Error('JWT_SECRET is not set');
 }
 
-export function signToken(payload: JwtPayload): string {
+export const signToken = (payload: AuthPayload) => {
   return jwt.sign(payload, JWT_SECRET, { 
     expiresIn: JWT_EXPIRES_IN as jwt.SignOptions['expiresIn']
   } as jwt.SignOptions);
 }
 
-export function verifyToken(token: string): JwtPayload {
+export const verifyToken = (token: string) => {
   return jwt.verify(token, JWT_SECRET) as JwtPayload;
 }

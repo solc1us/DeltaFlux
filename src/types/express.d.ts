@@ -1,12 +1,11 @@
-import 'express-serve-static-core';
+import type { User } from '@prisma/client';
+import type { AuthPayload } from './index';
 
-declare module 'express-serve-static-core' {
-  interface Request {
-    user?: {
-      id: string;
-      name?: string;
-      email: string;
-    };
+declare global {
+  namespace Express {
+    interface Request {
+      user?: User | AuthPayload;
+    }
   }
 }
 

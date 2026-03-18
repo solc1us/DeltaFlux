@@ -1,46 +1,35 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt.util';
-import { AuthRequest } from '../types';
+import { AuthPayload, AuthenticatedRequest } from '../types';
+import { AppError } from '../utils/app.error';
 
-/**
- * Auth Middleware: Proteksi route agar hanya bisa diakses user dengan token valid.
- * Sesuai roadmap Phase 1 Order 1.4.
- */
-export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
-  const authReq = req as AuthRequest;
+export const authMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
-  // Check format Authorization: Bearer <token>
+  // 1. Cek format Bearer Token
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({ 
-      status: 'error',
-      message: 'Unauthorized: No token provided' 
-    });
-    return;
+    return next(new AppError(401, 'Unauthorized: No token provided'));
   }
 
-  const token = authHeader.split(' ')[1]!;
-
+  const token = authHeader.split(' ')[1]!; // Ambil token setelah 'Bearer '
 
   try {
-    // Menggunakan utilitas terpusat sesuai Phase 0 setup 
-    const payload = verifyToken(token);
-    
-    // Inject data user ke object request (sudah dikenali via express.d.ts)
-    authReq.user = {
-      id: payload.userId,
-      name: payload.name,
+    // 2. Verify Token & Cast ke AuthPayload yang ada username-nya
+    const payload = verifyToken(token) as AuthPayload;
+
+    // 3. Inject ke req.user. 
+    // Karena express.d.ts lu pake tipe 'User' dari Prisma, 
+    // kita pastiin object-nya punya property yang minimal dibutuhin.
+    req.user = {
+      id: payload.id,
+      username: payload.username,
       email: payload.email,
+      name: payload.name,
     };
 
     next();
-  } catch (err) {
-    // Log error secara internal tapi berikan pesan standar ke user
-    console.error('JWT verification failed:', err instanceof Error ? err.message : err);
-    
-    res.status(401).json({ 
-      status: 'error',
-      message: 'Invalid or expired token' 
-    });
+  } catch {
+    // 4. Lempar ke Global Error Handler
+    next(new AppError(401, 'Invalid or expired token'));
   }
-}
+};
