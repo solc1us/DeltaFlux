@@ -1,30 +1,35 @@
-// src/middleware/auth.middleware.ts
 import { Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { env } from '../config/env';
-import { AuthRequest, AuthPayload } from '../types';
+import { verifyToken } from '../utils/jwt.util';
+import { AuthPayload, AuthenticatedRequest } from '../types';
+import { AppError } from '../utils/app.error';
 
-export function authMiddleware(
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): void {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader?.startsWith('Bearer ')
-    ? authHeader.slice(7)
-    : undefined;
+export const authMiddleware = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
 
-  if (!token) {
-    res.status(401).json({ message: 'No token provided' });
-    return;
+  // 1. Cek format Bearer Token
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return next(new AppError(401, 'Unauthorized: No token provided'));
   }
+
+  const token = authHeader.split(' ')[1]!; // Ambil token setelah 'Bearer '
 
   try {
-    const payload = jwt.verify(token, env.jwtSecret) as AuthPayload;
-    req.user = payload;
+    // 2. Verify Token & Cast ke AuthPayload yang ada username-nya
+    const payload = verifyToken(token) as AuthPayload;
+
+    // 3. Inject ke req.user. 
+    // Karena express.d.ts lu pake tipe 'User' dari Prisma, 
+    // kita pastiin object-nya punya property yang minimal dibutuhin.
+    req.user = {
+      id: payload.id,
+      username: payload.username,
+      email: payload.email,
+      name: payload.name,
+    };
+
     next();
-  } catch (err) {
-    console.error('JWT verification failed:', err instanceof Error ? err.message : err);
-    res.status(401).json({ message: 'Invalid or expired token' });
+  } catch {
+    // 4. Lempar ke Global Error Handler
+    next(new AppError(401, 'Invalid or expired token'));
   }
-}
+};

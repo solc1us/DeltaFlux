@@ -2,6 +2,9 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { register, login } from '../controllers/auth.controller';
+import { validate } from '../middleware/validate.middleware';
+import { registerSchema, loginSchema } from '../schemas/auth.schema'
+
 
 const router = Router();
 
@@ -13,7 +16,7 @@ const authLimiter = rateLimit({
   message: { message: 'Too many requests, please try again later.' },
 });
 
-router.post('/register', authLimiter, register);
-router.post('/login', authLimiter, login);
+router.post('/register', authLimiter, validate(registerSchema), register);
+router.post('/login', authLimiter, validate(loginSchema), login);
 
 export default router;

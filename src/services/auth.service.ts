@@ -1,19 +1,20 @@
-// src/services/auth.service.ts
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
-import { env } from '../config/env';
+import bcrypt from 'bcrypt';
 import { prisma } from '../config/prisma';
-import { AppError } from '../middleware/error.middleware';
+import { signToken } from '../utils/jwt.util';
+import { AppError } from '../utils/app.error';
+
+// Sesuai roadmap Phase 1 - Authentication Layer 
+const SALT_ROUNDS = 12;
 
 export interface RegisterInput {
   name: string;
+  username: string;
   email: string;
   password: string;
 }
 
 export interface LoginInput {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -21,66 +22,76 @@ export interface AuthResult {
   token: string;
   user: {
     id: string;
+    username: string;
     name: string;
     email: string;
   };
 }
 
+/**
+ * RegisterUser: Menangani pendaftaran user baru di DeltaFlux. 
+ * Menggunakan status code 409 untuk konflik email.
+ */
 export async function registerUser(input: RegisterInput): Promise<AuthResult> {
-  const existing = await prisma.user.findUnique({
-    where: { email: input.email },
+  const existing = await prisma.user.findFirst({ 
+    where: { OR: [
+      { email: input.email },
+      { username: input.username }
+    ] } 
   });
 
   if (existing) {
-    const error: AppError = new Error('Email already in use');
-    error.statusCode = 409;
-    throw error;
+    const message = existing.email === input.email
+      ? 'Email already in use' : 'Username already in use';
+    throw new AppError(409, message);
   }
 
-  const passwordHash = await bcrypt.hash(input.password, 12);
+  // Hashing password sebelum simpan ke DB 
+  const password_hash = await bcrypt.hash(input.password, SALT_ROUNDS);
 
   const user = await prisma.user.create({
-    data: {
-      id: uuidv4(),
+    data: { 
       name: input.name,
       email: input.email,
-      passwordHash,
+      username: input.username,
+      passwordHash: password_hash 
     },
+    select: { id: true, email: true, name: true, username: true },
   });
 
-  const token = jwt.sign(
-    { userId: user.id, email: user.email },
-    env.jwtSecret,
-    { expiresIn: env.jwtExpiresIn } as jwt.SignOptions
-  );
+  // Generate JWT Token 
+  const token = signToken({ id: user.id, email: user.email, name: user.name, username: user.username });
 
-  return { token, user: { id: user.id, name: user.name, email: user.email } };
+  return { user, token };
 }
 
+/**
+ * LoginUser: Menangani autentikasi user DeltaFlux. 
+ * Menggunakan status code 401 untuk kredensial tidak valid.
+ */
 export async function loginUser(input: LoginInput): Promise<AuthResult> {
-  const user = await prisma.user.findUnique({
-    where: { email: input.email },
+  const user = await prisma.user.findUnique({ 
+    where: { username: input.username } 
   });
 
   if (!user) {
-    const error: AppError = new Error('Invalid email or password');
-    error.statusCode = 401;
-    throw error;
+    throw new AppError(401, 'Invalid username or password');
   }
 
   const valid = await bcrypt.compare(input.password, user.passwordHash);
-
   if (!valid) {
-    const error: AppError = new Error('Invalid email or password');
-    error.statusCode = 401;
-    throw error;
+    throw new AppError(401, 'Invalid username or password');
   }
 
-  const token = jwt.sign(
-    { userId: user.id, email: user.email },
-    env.jwtSecret,
-    { expiresIn: env.jwtExpiresIn } as jwt.SignOptions
-  );
+  const token = signToken({ id: user.id, email: user.email, name: user.name, username: user.username });
 
-  return { token, user: { id: user.id, name: user.name, email: user.email } };
+  return {
+  token,
+  user: { 
+    id: user.id, 
+    email: user.email, 
+    name: user.name,
+    username: user.username 
+  },
+};
 }
