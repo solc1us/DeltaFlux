@@ -2,6 +2,7 @@ import { prisma } from "../config/prisma";
 import {
 	CreateTransactionInput,
 	UpdateTransactionInput,
+	GetTransactionsQuery,
 } from "../schemas/transaction.schema";
 import { AppError } from "../utils/app.error";
 import { Prisma } from "@prisma/client";
@@ -43,12 +44,38 @@ export const createTransaction = async (
 	});
 };
 
-// Get All Transactions with Basic Filter
-export const getAllTransactions = async (userId: string) => {
+// Get All Transactions with Basic Filtering (month, year, category_id)
+export const getAllTransactions = async (
+	userId: string,
+	filter: GetTransactionsQuery,
+) => {
+	const { month, year, category_id } = filter;
+
+	// Inisialisasi object 'where'
+	const where: any = { userId };
+
+	// Logic Filter Tanggal
+	if (month && year) {
+		const startDate = new Date(year, month - 1, 1); // Awal bulan
+		const endDate = new Date(year, month, 1); // Awal bulan berikutnya
+
+		where.transactionDate = {
+			gte: startDate,
+			lt: endDate, // Mencakup semua sampai akhir bulan (excl. tgl 1 bulan depan)
+		};
+	}
+
+	// Logic Filter Kategori
+	if (category_id) {
+		where.categoryId = category_id;
+	}
+
 	return await prisma.transaction.findMany({
-		where: { userId },
+		where,
 		orderBy: { transactionDate: "desc" },
-		include: { category: { select: { name: true, type: true } } },
+		include: {
+			category: { select: { name: true, type: true } },
+		},
 	});
 };
 

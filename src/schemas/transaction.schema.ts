@@ -24,6 +24,25 @@ export const updateTransactionSchema = z.object({
 	body: createTransactionSchema.shape.body.partial(), // Semua field jadi opsional
 });
 
+export const getTransactionsSchema = z.object({
+	query: z.object({
+		month: z
+			.string()
+			.regex(/^(0?[1-9]|1[0-2])$/, "Month must be between 1-12")
+			.transform(Number)
+			.optional(),
+		year: z
+			.string()
+			.regex(/^\d{4}$/, "Year must be a 4-digit number")
+			.transform(Number)
+			.optional(),
+		category_id: z.string().uuid().optional(),
+	}),
+});
+
+export type GetTransactionsQuery = z.infer<
+	typeof getTransactionsSchema
+>["query"];
 export type UpdateTransactionInput = z.infer<
 	typeof updateTransactionSchema
 >["body"];

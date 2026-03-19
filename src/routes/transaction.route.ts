@@ -4,6 +4,7 @@ import { authMiddleware } from "../middleware/auth.middleware";
 import { validate } from "../middleware/validate.middleware";
 import {
 	createTransactionSchema,
+	getTransactionsSchema,
 	updateTransactionSchema,
 } from "../schemas/transaction.schema";
 
@@ -25,7 +26,7 @@ router.post(
  * @route   GET /api/transactions
  * @desc    Get all transactions for the logged-in user
  */
-router.get("/", transactionController.getAll);
+router.get("/", validate(getTransactionsSchema), transactionController.getAll);
 
 /**
  * @route   GET /api/transactions/:id

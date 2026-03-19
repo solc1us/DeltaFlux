@@ -1,6 +1,7 @@
 import { Response, NextFunction } from "express";
 import * as transactionService from "../services/transaction.service";
 import { AuthenticatedRequest } from "../types"; // Import interface custom
+import { GetTransactionsQuery } from "src/schemas/transaction.schema";
 
 export async function create(
 	req: AuthenticatedRequest,
@@ -35,10 +36,18 @@ export async function getAll(
 	next: NextFunction,
 ) {
 	try {
+		// Zod bakal handle: kalo kosong ya {} , kalo ada ya divalidasi
+		const query = req.query as unknown as GetTransactionsQuery;
 		const transactions = await transactionService.getAllTransactions(
 			req.user!.id,
+			query,
 		);
-		res.status(200).json({ status: "success", data: { transactions } });
+
+		res.status(200).json({
+			status: "success",
+			results: transactions.length,
+			data: { transactions },
+		});
 	} catch (err) {
 		next(err);
 	}
