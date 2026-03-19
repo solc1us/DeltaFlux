@@ -2,25 +2,51 @@ import { Router } from "express";
 import * as transactionController from "../controllers/transaction.controller";
 import { authMiddleware } from "../middleware/auth.middleware";
 import { validate } from "../middleware/validate.middleware";
-import { createTransactionSchema } from "../schemas/transaction.schema";
+import {
+	createTransactionSchema,
+	updateTransactionSchema,
+} from "../schemas/transaction.schema";
 
 const router = Router();
 
+router.use(authMiddleware); // Semua route di sini butuh auth
+
 /**
- * Route: POST /api/transactions/
- * Desc: Create new transaction (Income/Expense)
- * Access: Private
+ * @route   POST /api/transactions
+ * @desc    Create a new transaction
  */
 router.post(
 	"/",
-	authMiddleware, // Cast biar Express gak bawel
 	validate(createTransactionSchema),
-	transactionController.create, // Cast di sini juga
+	transactionController.create,
 );
 
+/**
+ * @route   GET /api/transactions
+ * @desc    Get all transactions for the logged-in user
+ */
 router.get("/", transactionController.getAll);
+
+/**
+ * @route   GET /api/transactions/:id
+ * @desc    Get single transaction by ID
+ */
 router.get("/:id", transactionController.getById);
-router.patch("/:id", transactionController.update);
+
+/**
+ * @route   PATCH /api/transactions/:id
+ * @desc    Partial update transaction
+ */
+router.patch(
+	"/:id",
+	validate(updateTransactionSchema),
+	transactionController.update,
+);
+
+/**
+ * @route   DELETE /api/transactions/:id
+ * @desc    Delete transaction
+ */
 router.delete("/:id", transactionController.remove);
 
 export default router;
