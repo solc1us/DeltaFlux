@@ -1,20 +1,51 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-const TRANSACTION_TYPES = ['income', 'expense'] as const;
+const TRANSACTION_TYPES = ["income", "expense"] as const;
 
 export const createTransactionSchema = z.object({
-  body: z.object({
-    type: z.enum(TRANSACTION_TYPES, {
-      error: "Type must be 'income' or 'expense'",
-    }),
-    amount: z.number().positive('Amount must be greater than 0'),
-    category_id: z.uuid('Invalid category ID format'),
-    source: z.string().min(1, 'Source is required (e.g., atm, gopay, cash)'),
-    description: z.string().optional(),
-    transaction_date: z.string().refine((date) => !isNaN(Date.parse(date)), {
-      message: "Invalid date format, use YYYY-MM-DD",
-    }),
-  }),
+	body: z.object({
+		type: z.enum(TRANSACTION_TYPES, {
+			error: "Type must be 'income' or 'expense'",
+		}),
+		amount: z.number().positive("Amount must be greater than 0"),
+		category_id: z.uuid("Invalid category ID format"),
+		source: z.string().min(1, "Source is required (e.g., atm, gopay, cash)"),
+		description: z.string().optional(),
+		transaction_date: z.string().refine((date) => !isNaN(Date.parse(date)), {
+			message: "Invalid date format, use YYYY-MM-DD",
+		}),
+	}),
 });
 
-export type CreateTransactionInput = z.infer<typeof createTransactionSchema>['body'];
+export const updateTransactionSchema = z.object({
+	params: z.object({
+		id: z.uuid("Invalid transaction ID"),
+	}),
+	body: createTransactionSchema.shape.body.partial(), // Semua field jadi opsional
+});
+
+export const getTransactionsSchema = z.object({
+	query: z.object({
+		month: z
+			.string()
+			.regex(/^(0?[1-9]|1[0-2])$/, "Month must be between 1-12")
+			.transform(Number)
+			.optional(),
+		year: z
+			.string()
+			.regex(/^\d{4}$/, "Year must be a 4-digit number")
+			.transform(Number)
+			.optional(),
+		category_id: z.string().uuid().optional(),
+	}),
+});
+
+export type GetTransactionsQuery = z.infer<
+	typeof getTransactionsSchema
+>["query"];
+export type UpdateTransactionInput = z.infer<
+	typeof updateTransactionSchema
+>["body"];
+export type CreateTransactionInput = z.infer<
+	typeof createTransactionSchema
+>["body"];
