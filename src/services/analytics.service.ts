@@ -71,10 +71,10 @@ export const getTopCategories = async (
 export const getSummary = async (userId: string, filter: GetSummaryQuery) => {
 	const { month, year } = filter;
 
-	const currentStart = new Date(year, month - 1, 1);
-	const currentEnd = new Date(year, month, 1);
-	const prevStart = new Date(year, month - 2, 1);
-	const prevEnd = new Date(year, month - 1, 1);
+	const currentStart = new Date(Date.UTC(year, month - 1, 1));
+	const currentEnd = new Date(Date.UTC(year, month, 1));
+	const prevStart = new Date(Date.UTC(year, month - 2, 1));
+	const prevEnd = new Date(Date.UTC(year, month - 1, 1));
 
 	const [currentStats, prevStats] = await Promise.all([
 		getMonthlyStats(userId, currentStart, currentEnd),
@@ -101,6 +101,10 @@ export const getSummary = async (userId: string, filter: GetSummaryQuery) => {
 			income: currentStats.income,
 			expense: currentStats.expense,
 			balance: currentStats.income - currentStats.expense,
+		},
+		previous: {
+			income: prevStats.income,
+			expense: prevStats.expense,
 		},
 		// Jika tidak ada transaksi bulan lalu, analisis deviasi (MoM) dikirim null
 		analysis: hasPrevTransactions
@@ -144,10 +148,10 @@ export const getCategoryDeviation = async (
 	const { month, year } = filter;
 	const THRESHOLD = 20; // Hardcoded 20%
 
-	const currentStart = new Date(year, month - 1, 1);
-	const currentEnd = new Date(year, month, 1);
-	const prevStart = new Date(year, month - 2, 1);
-	const prevEnd = new Date(year, month - 1, 1);
+	const currentStart = new Date(Date.UTC(year, month - 1, 1));
+	const currentEnd = new Date(Date.UTC(year, month, 1));
+	const prevStart = new Date(Date.UTC(year, month - 2, 1));
+	const prevEnd = new Date(Date.UTC(year, month - 1, 1));
 
 	// 1. Ambil semua kategori Expense milik user
 	const categories = await prisma.category.findMany({
