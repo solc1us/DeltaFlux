@@ -56,8 +56,8 @@ export const getAllTransactions = async (
 
 	// Logic Filter Tanggal
 	if (month && year) {
-		const startDate = new Date(year, month - 1, 1); // Awal bulan
-		const endDate = new Date(year, month, 1); // Awal bulan berikutnya
+		const startDate = new Date(Date.UTC(year, month - 1, 1)); // Awal bulan
+		const endDate = new Date(Date.UTC(year, month, 1)); // Awal bulan berikutnya
 
 		where.transactionDate = {
 			gte: startDate,
