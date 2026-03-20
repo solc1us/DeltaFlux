@@ -9,6 +9,12 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get(
+	"/top-categories",
+	validate(getSummarySchema),
+	dashboardController.getTopCategories,
+);
+
+router.get(
 	"/summary",
 	validate(getSummarySchema),
 	dashboardController.getSummary,
