@@ -1,5 +1,6 @@
 import { PrismaClient, Prisma } from "@prisma/client";
 import { Pool } from "pg";
+import bcrypt from "bcryptjs";
 import { PrismaPg } from "@prisma/adapter-pg";
 import dotenv from "dotenv";
 
@@ -27,10 +28,10 @@ async function main() {
 	// 2. Buat User dummy (pake email yang biasa lu pake login)
 	const user = await prisma.user.create({
 		data: {
-			email: "marcel@mail.com",
-			username: "marcel",
-			passwordHash: "$2b$10$YourHashedPasswordHere", // Pastikan sesuai bcrypt kalo mau dipake login
-			name: "Marcel",
+			email: "marcel123@mail.com",
+			username: "marcel123",
+			passwordHash: await bcrypt.hash("asd12345", 10), // Hash password sebelum disimpan
+			name: "Marcel123",
 		},
 	});
 

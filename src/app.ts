@@ -6,6 +6,7 @@ import authRoute from "./routes/auth.route";
 import protectedRoute from "./routes/protected.route";
 import transactionRoute from "./routes/transaction.route";
 import categoryRoutes from "./routes/category.route";
+import dashboardRoute from "./routes/dashboard.route";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.get("/", (_req, res) => {
 app.use("/api", router);
 app.use("/api/auth", authRoute);
 app.use("/api/categories", categoryRoutes); // Endpoint: /api/categories
+app.use("/api/dashboard", dashboardRoute); // Endpoint: /api/dashboard
 app.use("/api/transactions", transactionRoute); // Endpoint: /api/transactions
 app.use("/api/protected", protectedRoute);
 
