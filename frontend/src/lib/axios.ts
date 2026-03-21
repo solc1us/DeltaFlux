@@ -1,18 +1,23 @@
 import axios from "axios";
 
+// Interface standar response dari Backend DeltaFlux
+export interface ApiResponse<T> {
+	status: string;
+	data: T;
+	message?: string;
+}
+
 export const api = axios.create({
-	// Kita pake variable env biar gak hardcoded
-	baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
+	baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api",
 	headers: {
 		"Content-Type": "application/json",
 	},
 });
 
-// Interceptor: Otomatis nambahin Token ke tiap request kalau ada di localStorage
 api.interceptors.request.use((config) => {
 	if (typeof window !== "undefined") {
 		const token = localStorage.getItem("token");
-		if (token) {
+		if (token && config.headers) {
 			config.headers.Authorization = `Bearer ${token}`;
 		}
 	}
