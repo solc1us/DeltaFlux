@@ -1,6 +1,14 @@
 import { prisma } from "../config/prisma";
 import { GetSummaryQuery } from "../schemas/analytics.schema";
 
+/**
+ * Identify the top expense categories for a month and compute month-over-month growth.
+ * Compares current vs previous month and returns `mom_growth = null` when previous amount is zero to avoid division-by-zero; limits results to the top 3 expense categories.
+ * Handles missing previous-month data and maps category names safely.
+ * @param {string} userId
+ * @param {GetSummaryQuery} filter
+ * @returns {Promise<Array<{category_id: string; category_name: string; amount: number; mom_growth: number | null}>>}
+ */
 export const getTopCategories = async (
 	userId: string,
 	filter: GetSummaryQuery,
@@ -68,6 +76,14 @@ export const getTopCategories = async (
 	return results;
 };
 
+/**
+ * Produce a monthly summary with current and previous totals and growth percentages.
+ * Returns `analysis = null` if there are no previous-month transactions to avoid misleading growth values; growth calculations are rounded to two decimals.
+ * Ensures UTC-boundary calculations to avoid timezone drift when computing month ranges.
+ * @param {string} userId
+ * @param {GetSummaryQuery} filter
+ * @returns {Promise<{month: number; year: number; current: {income: number; expense: number; balance: number}; previous: {income: number; expense: number}; analysis: {income_growth: number | null; expense_growth: number | null} | null; metadata: {has_previous_data: boolean}}>}
+ */
 export const getSummary = async (userId: string, filter: GetSummaryQuery) => {
 	const { month, year } = filter;
 
@@ -123,6 +139,14 @@ export const getSummary = async (userId: string, filter: GetSummaryQuery) => {
 };
 
 // Private Helper Service
+/**
+ * Aggregates income and expense totals for a UTC-bounded date range.
+ * Returns zeros for missing types to make calling code simple and avoid undefined handling.
+ * @param {string} userId
+ * @param {Date} start
+ * @param {Date} end
+ * @returns {Promise<{income: number; expense: number}>}
+ */
 async function getMonthlyStats(userId: string, start: Date, end: Date) {
 	const stats = await prisma.transaction.groupBy({
 		by: ["type"],
@@ -141,6 +165,14 @@ async function getMonthlyStats(userId: string, start: Date, end: Date) {
 	return { income, expense };
 }
 
+/**
+ * Compute per-category month-over-month percentage deviations for expense categories.
+ * Marks `momPercentage = null` when previous total is zero and flags significant deviations using a configurable threshold (hardcoded 20% here).
+ * Filters out categories with no activity in both months to keep responses concise.
+ * @param {string} userId
+ * @param {GetSummaryQuery} filter
+ * @returns {Promise<Array<{categoryId: string; categoryName: string; currentTotal: number; previousTotal: number; momPercentage: number | null; isSignificant: boolean}>>}
+ */
 export const getCategoryDeviation = async (
 	userId: string,
 	filter: GetSummaryQuery,

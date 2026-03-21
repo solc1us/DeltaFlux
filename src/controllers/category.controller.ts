@@ -2,6 +2,10 @@ import { Response, NextFunction } from "express";
 import * as categoryService from "../services/category.service";
 import { AuthenticatedRequest } from "../types";
 
+/**
+ * Handle Create Category
+ * Route: POST /api/categories
+ */
 export async function create(
 	req: AuthenticatedRequest,
 	res: Response,
@@ -17,6 +21,14 @@ export async function create(
 		next(err);
 	}
 }
+
+/**
+ * Handle Get All Categories
+ * Route: GET /api/categories
+ * Optional Query: ?type=income|expense
+ * 	- Jika type diberikan, maka hanya kategori dengan type tersebut yang dikembalikan
+ *  - Jika tidak diberikan, maka semua kategori milik user dikembalikan
+ */
 
 export async function getAll(
 	req: AuthenticatedRequest,
