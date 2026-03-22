@@ -7,10 +7,17 @@ import protectedRoute from "./routes/protected.route";
 import transactionRoute from "./routes/transaction.route";
 import categoryRoutes from "./routes/category.route";
 import analyticsRoute from "./routes/analytics.route";
+import cors from "cors";
 
 const app = express();
 
 app.use(express.json());
+app.use(
+	cors({
+		origin: "http://localhost:3001", // FE running on port 3001
+		credentials: true,
+	}),
+);
 
 // 2. Health Check (Optional tapi good practice)
 app.get("/health", (_req, res) => {
