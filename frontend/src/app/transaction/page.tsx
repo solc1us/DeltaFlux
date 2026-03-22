@@ -24,40 +24,38 @@ export default function TransactionPage() {
 
 	return (
 		<AuthGuard>
-			<main className="min-h-screen bg-gray-50 p-8">
-				<div className="mx-auto max-w-5xl">
-					{/* 1. Header Section */}
-					<header className="mb-8 flex items-center justify-between">
-						<div>
-							<h1 className="text-2xl font-bold text-gray-900">Transactions</h1>
-							<p className="text-sm text-gray-500">March 2026 Analysis</p>
-						</div>
-						<button
-							onClick={() => setIsModalOpen(true)}
-							className="flex rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"
-						>
-							<Plus className="w-4 h-4" />
-							Add Transaction
-						</button>
-					</header>
-
-					{/* 2. Table Section */}
-					{isLoading ? (
-						<div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white">
-							<p className="text-sm text-gray-400 animate-pulse">
-								Fetching records...
-							</p>
-						</div>
-					) : (
-						<TransactionTable transactions={data?.transactions || []} />
-					)}
-
-					{/* 3. Modal Form (Akan kita buat di bawah) */}
-					{isModalOpen && (
-						<TransactionForm onClose={() => setIsModalOpen(false)} />
-					)}
+			<div className="space-y-8">
+				{/* 1. Header Section */}
+				<div className="flex items-center justify-between">
+					<div>
+						<h1 className="text-3xl font-bold tracking-tight">Transactions</h1>
+						<p className="text-gray-500">Manage and monitor your cash flow.</p>
+					</div>
+					<button
+						onClick={() => setIsModalOpen(true)}
+						className="flex items-center gap-2 rounded-lg bg-black px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 transition-all shadow-sm"
+					>
+						<Plus className="w-4 h-4" />
+						Add Transaction
+					</button>
 				</div>
-			</main>
+
+				{/* 2. Table Section */}
+				{isLoading ? (
+					<div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white">
+						<p className="text-sm text-gray-400 animate-pulse">
+							Fetching records...
+						</p>
+					</div>
+				) : (
+					<TransactionTable transactions={data?.transactions || []} />
+				)}
+
+				{/* 3. Modal Form (Akan kita buat di bawah) */}
+				{isModalOpen && (
+					<TransactionForm onClose={() => setIsModalOpen(false)} />
+				)}
+			</div>
 		</AuthGuard>
 	);
 }
