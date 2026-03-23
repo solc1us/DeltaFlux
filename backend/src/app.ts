@@ -12,9 +12,23 @@ import cors from "cors";
 const app = express();
 
 app.use(express.json());
+
+const allowedOrigins = [
+	process.env.CORS_ORIGIN, // URL Vercel lu nanti
+	"http://localhost:3000", // Default Next.js
+	"http://localhost:3001", // Port alternatif lu
+].filter(Boolean) as string[]; // Filter Boolean biar kalau env kosong nggak error
+
 app.use(
 	cors({
-		origin: "http://localhost:3001", // FE running on port 3001
+		origin: (origin, callback) => {
+			// Izinkan jika origin ada di list atau jika tidak ada origin (seperti Postman/Server-to-server)
+			if (!origin || allowedOrigins.includes(origin)) {
+				callback(null, true);
+			} else {
+				callback(new Error("Not allowed by CORS"));
+			}
+		},
 		credentials: true,
 	}),
 );
@@ -39,5 +53,13 @@ app.use("/api/protected", protectedRoute);
 
 // Error handling middleware harus di paling bawah setelah semua route
 app.use(errorMiddleware);
+
+// Logic Penting: Cek apakah jalan di Vercel atau Local
+if (process.env.NODE_ENV !== "production") {
+	const PORT = process.env.PORT || 5000;
+	app.listen(PORT, () => {
+		console.log(`Server is running on port ${PORT}`);
+	});
+}
 
 export default app;
