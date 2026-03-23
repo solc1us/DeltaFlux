@@ -14,22 +14,26 @@ const app = express();
 app.use(express.json());
 
 const allowedOrigins = [
-	process.env.CORS_ORIGIN, // URL Vercel lu nanti
-	"http://localhost:3000", // Default Next.js
-	"http://localhost:3001", // Port alternatif lu
-].filter(Boolean) as string[]; // Filter Boolean biar kalau env kosong nggak error
+	process.env.CORS_ORIGIN?.replace(/\/$/, ""), // Hapus trailing slash kalau ada
+	"http://localhost:3000",
+	"http://localhost:3001",
+].filter(Boolean) as string[];
 
 app.use(
 	cors({
 		origin: (origin, callback) => {
-			// Izinkan jika origin ada di list atau jika tidak ada origin (seperti Postman/Server-to-server)
-			if (!origin || allowedOrigins.includes(origin)) {
+			// Jika tidak ada origin (Postman) atau origin terdaftar
+			if (!origin || allowedOrigins.includes(origin.replace(/\/$/, ""))) {
 				callback(null, true);
 			} else {
+				console.error(`CORS Blocked for origin: ${origin}`);
 				callback(new Error("Not allowed by CORS"));
 			}
 		},
+		methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+		allowedHeaders: ["Content-Type", "Authorization"],
 		credentials: true,
+		optionsSuccessStatus: 200, // Penting: Balikin 200 buat OPTIONS
 	}),
 );
 
