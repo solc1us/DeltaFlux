@@ -6,6 +6,8 @@ import { api } from "@/lib/axios";
 import { X } from "lucide-react";
 import { Category, CreateCategoryInput } from "@/types/category";
 import { useEffect } from "react";
+import { toast } from "sonner";
+import { clsx } from "clsx";
 
 interface CategoryFormProps {
 	onClose: () => void;
@@ -55,10 +57,11 @@ export default function CategoryForm({
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["categories"] });
+			toast.success("Category updated"); // Jauh lebih clean daripada alert()
 			onClose();
 		},
 		onError: () => {
-			alert("Error saving category");
+			toast.error("Error saving category");
 		},
 	});
 
@@ -82,13 +85,21 @@ export default function CategoryForm({
 					onSubmit={handleSubmit((data) => mutation.mutate(data))}
 					className="space-y-4"
 				>
+					{/* Toggle Type */}
 					<div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-lg">
 						{(["income", "expense"] as const).map((t) => (
-							<label key={t} className="cursor-pointer">
+							<label
+								key={t}
+								className={clsx(
+									"cursor-pointer",
+									isEdit && "cursor-not-allowed opacity-60", // Visual feedback kalau disabled
+								)}
+							>
 								<input
 									type="radio"
 									value={t}
 									{...register("type")}
+									disabled={isEdit} // Strict: Lock value pas Edit mode
 									className="peer hidden"
 								/>
 								<div className="text-center py-2 text-sm font-semibold rounded-md peer-checked:bg-white peer-checked:text-black peer-checked:shadow-sm text-gray-500 capitalize transition-all">

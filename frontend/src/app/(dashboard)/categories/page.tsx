@@ -7,6 +7,10 @@ import { Category } from "@/types/category";
 import AuthGuard from "@/components/auth/auth-guard";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import CategoryForm from "@/components/categories/category-form";
+import { toast } from "sonner";
+import ConfirmModal from "@/components/ui/confirm-modal";
+import { AxiosError } from "axios";
+import { ApiErrorResponse } from "@/types/api";
 
 interface CategoryResponse {
 	categories: Category[];
@@ -14,6 +18,7 @@ interface CategoryResponse {
 
 export default function CategoryPage() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [deletingId, setDeletingId] = useState<string | null>(null);
 	const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 	const queryClient = useQueryClient();
 
@@ -30,9 +35,14 @@ export default function CategoryPage() {
 		mutationFn: (id: string) => api.delete(`/categories/${id}`),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["categories"] });
+			setDeletingId(null);
+			toast.success("Category deleted");
 		},
-		onError: () => {
-			alert("Failed to delete category");
+		onError: (error: AxiosError<ApiErrorResponse>) => {
+			setDeletingId(null);
+			const errorMessage =
+				error.response?.data.message || "Error deleting category";
+			toast.error(errorMessage);
 		},
 	});
 
@@ -47,9 +57,7 @@ export default function CategoryPage() {
 	};
 
 	const handleDelete = (id: string) => {
-		if (confirm("Are you sure you want to delete this category?")) {
-			deleteMutation.mutate(id);
-		}
+		setDeletingId(id);
 	};
 
 	return (
@@ -103,7 +111,7 @@ export default function CategoryPage() {
 											<Pencil className="w-4 h-4" />
 										</button>
 										<button
-											onClick={() => handleDelete(cat.id)}
+											onClick={() => setDeletingId(cat.id)}
 											className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
 										>
 											<Trash2 className="w-4 h-4" />
@@ -130,6 +138,17 @@ export default function CategoryPage() {
 						initialData={editingCategory ?? undefined}
 					/>
 				)}
+
+				<ConfirmModal
+					isOpen={!!deletingId}
+					onClose={() => setDeletingId(null)}
+					onConfirm={() => deletingId && deleteMutation.mutate(deletingId)}
+					isLoading={deleteMutation.isPending}
+					title="Delete Category?"
+					description="Are you sure? This action cannot be undone."
+					confirmText="Delete"
+					variant="danger"
+				/>
 			</div>
 		</AuthGuard>
 	);
