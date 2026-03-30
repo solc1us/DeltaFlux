@@ -31,7 +31,7 @@ export default function DashboardPage() {
 		},
 	});
 
-	// Query 2: Category Deviation (Real Data, No Mock)
+	// Query 2: Category Deviation
 	const { data: deviationData, isLoading: isDeviationLoading } = useQuery({
 		queryKey: ["deviations", 3, 2026],
 		queryFn: async () => {
@@ -64,19 +64,19 @@ export default function DashboardPage() {
 				<div className="grid grid-cols-1 gap-6 md:grid-cols-3">
 					<StatsCard
 						title="Total Income"
-						amount={summaryData?.current.income ?? 0}
-						growth={summaryData?.analysis.income_growth}
+						amount={summaryData?.current?.income ?? 0} // Safety di sini juga
+						growth={summaryData?.analysis?.income_growth} // Safety di sini
 						type="income"
 					/>
 					<StatsCard
 						title="Total Expense"
-						amount={summaryData?.current.expense ?? 0}
-						growth={summaryData?.analysis.expense_growth}
+						amount={summaryData?.current?.expense ?? 0}
+						growth={summaryData?.analysis?.expense_growth}
 						type="expense"
 					/>
 					<StatsCard
 						title="Net Balance"
-						amount={summaryData?.current.balance ?? 0}
+						amount={summaryData?.current?.balance ?? 0}
 					/>
 				</div>
 

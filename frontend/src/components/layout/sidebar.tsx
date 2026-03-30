@@ -15,6 +15,7 @@ import { clsx } from "clsx";
 const navLinks = [
 	{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
 	{ href: "/transaction", label: "Transaction", icon: ReceiptText },
+	{ href: "/categories", label: "Categories", icon: BarChart3 },
 	{ href: "/analytics", label: "Analytics", icon: BarChart3 },
 	{ href: "/settings", label: "Settings", icon: Settings },
 ];
