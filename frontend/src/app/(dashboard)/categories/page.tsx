@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, ApiResponse } from "@/lib/axios";
 import { Category } from "@/types/category";
 import AuthGuard from "@/components/auth/auth-guard";
-import { Plus, Tag } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import CategoryForm from "@/components/categories/category-form";
 
 interface CategoryResponse {
@@ -14,6 +14,8 @@ interface CategoryResponse {
 
 export default function CategoryPage() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+	const queryClient = useQueryClient();
 
 	const { data, isLoading } = useQuery({
 		queryKey: ["categories"],
@@ -24,6 +26,32 @@ export default function CategoryPage() {
 		},
 	});
 
+	const deleteMutation = useMutation({
+		mutationFn: (id: string) => api.delete(`/categories/${id}`),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["categories"] });
+		},
+		onError: () => {
+			alert("Failed to delete category");
+		},
+	});
+
+	const handleEdit = (category: Category) => {
+		setEditingCategory(category);
+		setIsModalOpen(true);
+	};
+
+	const handleCloseModal = () => {
+		setIsModalOpen(false);
+		setEditingCategory(null);
+	};
+
+	const handleDelete = (id: string) => {
+		if (confirm("Are you sure you want to delete this category?")) {
+			deleteMutation.mutate(id);
+		}
+	};
+
 	return (
 		<AuthGuard>
 			<div className="space-y-8">
@@ -31,7 +59,7 @@ export default function CategoryPage() {
 					<div>
 						<h1 className="text-3xl font-bold tracking-tight">Categories</h1>
 						<p className="text-gray-500">
-							Classification for your transactions.
+							Manage your income and expense labels.
 						</p>
 					</div>
 					<button
@@ -46,7 +74,7 @@ export default function CategoryPage() {
 				{isLoading ? (
 					<div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white">
 						<p className="text-sm text-gray-400 animate-pulse">
-							Fetching categories...
+							Fetching records...
 						</p>
 					</div>
 				) : (
@@ -57,9 +85,6 @@ export default function CategoryPage() {
 								className="group bg-white border border-gray-100 p-5 rounded-2xl shadow-sm hover:ring-1 hover:ring-black/5 transition-all"
 							>
 								<div className="flex items-center justify-between">
-									<div className="p-2 bg-gray-50 rounded-lg group-hover:bg-black group-hover:text-white transition-colors">
-										<Tag className="w-5 h-5" />
-									</div>
 									<span
 										className={`text-[10px] font-black uppercase tracking-[0.15em] px-2 py-1 rounded ${
 											cat.type === "income"
@@ -69,13 +94,29 @@ export default function CategoryPage() {
 									>
 										{cat.type}
 									</span>
+
+									<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+										<button
+											onClick={() => handleEdit(cat)}
+											className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+										>
+											<Pencil className="w-4 h-4" />
+										</button>
+										<button
+											onClick={() => handleDelete(cat.id)}
+											className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+										>
+											<Trash2 className="w-4 h-4" />
+										</button>
+									</div>
 								</div>
+
 								<div className="mt-4">
 									<h3 className="text-lg font-bold text-gray-900 leading-tight">
 										{cat.name}
 									</h3>
 									<p className="text-[10px] text-gray-400 mt-1 uppercase tracking-tighter">
-										Created {new Date(cat.createdAt).toLocaleDateString()}
+										Last updated {new Date(cat.updatedAt).toLocaleDateString()}
 									</p>
 								</div>
 							</div>
@@ -83,7 +124,12 @@ export default function CategoryPage() {
 					</div>
 				)}
 
-				{isModalOpen && <CategoryForm onClose={() => setIsModalOpen(false)} />}
+				{isModalOpen && (
+					<CategoryForm
+						onClose={handleCloseModal}
+						initialData={editingCategory ?? undefined}
+					/>
+				)}
 			</div>
 		</AuthGuard>
 	);
