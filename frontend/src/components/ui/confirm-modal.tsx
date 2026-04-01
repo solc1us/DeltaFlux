@@ -31,21 +31,22 @@ export default function ConfirmModal({
 	// Mapping variant ke styling tombol
 	const variantClasses = {
 		danger:
-			"bg-rose-600 hover:bg-rose-700 shadow-rose-200 disabled:bg-rose-400",
-		primary: "bg-black hover:bg-gray-800 shadow-gray-200 disabled:bg-gray-400",
+			"border border-rose-500/30 bg-rose-500/15 text-rose-200 hover:bg-rose-500/20 disabled:border-zinc-800 disabled:bg-zinc-800 disabled:text-zinc-500",
+		primary:
+			"border border-zinc-700 bg-zinc-100 text-zinc-900 hover:bg-zinc-200 disabled:border-zinc-800 disabled:bg-zinc-800 disabled:text-zinc-500",
 		warning:
-			"bg-amber-600 hover:bg-amber-700 shadow-amber-200 disabled:bg-amber-400",
+			"border border-amber-500/30 bg-amber-500/15 text-amber-200 hover:bg-amber-500/20 disabled:border-zinc-800 disabled:bg-zinc-800 disabled:text-zinc-500",
 	};
 
 	const iconClasses = {
-		danger: "bg-rose-50 text-rose-600",
-		primary: "bg-gray-50 text-gray-900",
-		warning: "bg-amber-50 text-amber-600",
+		danger: "border border-rose-500/30 bg-rose-500/10 text-rose-400",
+		primary: "border border-zinc-700 bg-zinc-800/80 text-zinc-200",
+		warning: "border border-amber-500/30 bg-amber-500/10 text-amber-400",
 	};
 
 	return (
-		<div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-			<div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-black/5 animate-in fade-in zoom-in duration-200">
+		<div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+			<div className="animate-in fade-in zoom-in duration-200 w-full max-w-sm rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-6 shadow-2xl shadow-black/40">
 				{/* Dynamic Icon Container based on Variant */}
 				<div
 					className={clsx(
@@ -57,10 +58,10 @@ export default function ConfirmModal({
 				</div>
 
 				<div className="text-center space-y-2">
-					<h3 className="text-lg font-bold text-gray-900 leading-tight">
+					<h3 className="text-lg font-bold leading-tight text-zinc-100">
 						{title}
 					</h3>
-					<p className="text-sm text-gray-500 leading-relaxed">{description}</p>
+					<p className="text-sm leading-relaxed text-zinc-500">{description}</p>
 				</div>
 
 				<div className="flex gap-3 mt-8">
@@ -68,7 +69,7 @@ export default function ConfirmModal({
 						type="button"
 						onClick={onClose}
 						disabled={isLoading}
-						className="flex-1 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-all"
+						className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800/80 px-4 py-2.5 text-sm font-semibold text-zinc-200 transition-all hover:bg-zinc-800 disabled:border-zinc-800 disabled:bg-zinc-900 disabled:text-zinc-500"
 					>
 						{cancelText}
 					</button>
@@ -77,7 +78,7 @@ export default function ConfirmModal({
 						onClick={onConfirm}
 						disabled={isLoading}
 						className={clsx(
-							"flex-1 px-4 py-2.5 text-sm font-semibold text-white rounded-lg shadow-lg transition-all",
+							"flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all",
 							variantClasses[variant],
 						)}
 					>

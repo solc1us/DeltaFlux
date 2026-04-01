@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import ConfirmModal from "@/components/ui/confirm-modal";
 import { AxiosError } from "axios";
 import { ApiErrorResponse } from "@/types/api";
+import { clsx } from "clsx";
 
 interface CategoryResponse {
 	categories: Category[];
@@ -56,23 +57,21 @@ export default function CategoryPage() {
 		setEditingCategory(null);
 	};
 
-	const handleDelete = (id: string) => {
-		setDeletingId(id);
-	};
-
 	return (
 		<AuthGuard>
 			<div className="space-y-8">
 				<div className="flex items-center justify-between">
 					<div>
-						<h1 className="text-3xl font-bold tracking-tight">Categories</h1>
-						<p className="text-gray-500">
+						<h1 className="text-3xl font-bold tracking-tight text-zinc-100">
+							Categories
+						</h1>
+						<p className="text-sm text-zinc-500">
 							Manage your income and expense labels.
 						</p>
 					</div>
 					<button
 						onClick={() => setIsModalOpen(true)}
-						className="flex items-center gap-2 rounded-lg bg-black px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 transition-all shadow-sm"
+						className="flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-100/95 px-4 py-2.5 text-sm font-semibold text-zinc-900 transition-all hover:bg-zinc-200"
 					>
 						<Plus className="w-4 h-4" />
 						Add Category
@@ -80,56 +79,70 @@ export default function CategoryPage() {
 				</div>
 
 				{isLoading ? (
-					<div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white">
-						<p className="text-sm text-gray-400 animate-pulse">
-							Fetching records...
-						</p>
+					<div className="flex h-64 items-center justify-center rounded-2xl border border-zinc-800/60 bg-zinc-900/40">
+						<div className="space-y-2 text-center">
+							<div className="mx-auto h-2 w-24 animate-pulse rounded-full bg-zinc-800" />
+							<p className="text-xs uppercase tracking-widest text-zinc-500">
+								Fetching records...
+							</p>
+						</div>
 					</div>
 				) : (
-					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-						{data?.categories.map((cat) => (
-							<div
-								key={cat.id}
-								className="group bg-white border border-gray-100 p-5 rounded-2xl shadow-sm hover:ring-1 hover:ring-black/5 transition-all"
-							>
-								<div className="flex items-center justify-between">
-									<span
-										className={`text-[10px] font-black uppercase tracking-[0.15em] px-2 py-1 rounded ${
-											cat.type === "income"
-												? "bg-emerald-50 text-emerald-600"
-												: "bg-rose-50 text-rose-600"
-										}`}
-									>
-										{cat.type}
-									</span>
-
-									<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-										<button
-											onClick={() => handleEdit(cat)}
-											className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-										>
-											<Pencil className="w-4 h-4" />
-										</button>
-										<button
-											onClick={() => setDeletingId(cat.id)}
-											className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
-										>
-											<Trash2 className="w-4 h-4" />
-										</button>
-									</div>
-								</div>
-
-								<div className="mt-4">
-									<h3 className="text-lg font-bold text-gray-900 leading-tight">
-										{cat.name}
-									</h3>
-									<p className="text-[10px] text-gray-400 mt-1 uppercase tracking-tighter">
-										Last updated {new Date(cat.updatedAt).toLocaleDateString()}
-									</p>
-								</div>
+					<>
+						{!data?.categories.length ? (
+							<div className="flex h-64 items-center justify-center rounded-2xl border border-zinc-800/60 bg-zinc-900/40">
+								<p className="text-[10px] uppercase tracking-widest text-zinc-500">
+									No categories yet. Add your first label.
+								</p>
 							</div>
-						))}
-					</div>
+						) : (
+							<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+								{data?.categories.map((cat) => (
+									<div
+										key={cat.id}
+										className="group rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 transition-all duration-300 hover:border-zinc-700 hover:shadow-2xl hover:shadow-black/40"
+									>
+										<div className="flex items-center justify-between">
+											<span
+												className={clsx(
+													"rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest",
+													cat.type === "income"
+														? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+														: "border-rose-500/20 bg-rose-500/10 text-rose-400",
+												)}
+											>
+												{cat.type}
+											</span>
+
+											<div className="flex gap-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+												<button
+													onClick={() => handleEdit(cat)}
+													className="rounded-lg border border-zinc-700/60 bg-zinc-800/40 p-2 text-zinc-400 backdrop-blur-sm transition-all hover:border-zinc-600 hover:bg-zinc-800/80 hover:text-zinc-100"
+												>
+													<Pencil className="h-4 w-4" />
+												</button>
+												<button
+													onClick={() => setDeletingId(cat.id)}
+													className="rounded-lg border border-rose-500/20 bg-rose-500/10 p-2 text-zinc-400 backdrop-blur-sm transition-all hover:border-rose-500/30 hover:text-rose-300"
+												>
+													<Trash2 className="h-4 w-4" />
+												</button>
+											</div>
+										</div>
+
+										<div className="mt-4">
+											<h3 className="text-lg font-semibold tracking-tight text-zinc-100">
+												{cat.name}
+											</h3>
+											<p className="mt-1 text-[10px] uppercase tracking-widest text-zinc-500">
+												Last updated {new Date(cat.updatedAt).toLocaleDateString()}
+											</p>
+										</div>
+									</div>
+								))}
+							</div>
+						)}
+					</>
 				)}
 
 				{isModalOpen && (
