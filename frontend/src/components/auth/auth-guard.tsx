@@ -30,9 +30,15 @@ export default function AuthGuard({ children }: AuthGuardProps) {
 	// Loading state supaya user nggak liat dashboard "pecah" sebelum redirect
 	if (!isAuthorized) {
 		return (
-			<div className="flex min-h-screen items-center justify-center bg-gray-50">
-				<div className="text-sm font-medium text-gray-500 animate-pulse">
-					Verifying session...
+			<div className="flex min-h-screen items-center justify-center bg-[#09090b] antialiased">
+				<div className="flex flex-col items-center gap-4">
+					{/* Subtle Pulse Loader */}
+					<div className="h-1 w-24 overflow-hidden rounded-full bg-zinc-800">
+						<div className="h-full w-full animate-pulse bg-zinc-600" />
+					</div>
+					<p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+						Verifying session
+					</p>
 				</div>
 			</div>
 		);

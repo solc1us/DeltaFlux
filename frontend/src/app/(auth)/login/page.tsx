@@ -8,10 +8,12 @@ import { LoginInput, AuthResponse } from "@/types/auth";
 import Link from "next/link";
 import { useState } from "react";
 import { AxiosError } from "axios";
+import { ApiErrorResponse } from "@/types/api"; // Re-use interface error tadi
 
 export default function LoginPage() {
 	const router = useRouter();
 	const [error, setError] = useState<string>("");
+
 	const {
 		register,
 		handleSubmit,
@@ -28,50 +30,84 @@ export default function LoginPage() {
 		},
 		onSuccess: (res) => {
 			localStorage.setItem("token", res.data.token);
+			// Inject token ke instance axios biar gak perlu nunggu refresh
+			api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
 			router.push("/dashboard");
 		},
-		onError: (err: AxiosError<ApiResponse<null>>) => {
-			setError(err.response?.data?.message || "Invalid credentials");
+		onError: (err: AxiosError<ApiErrorResponse>) => {
+			setError(err.response?.data?.message || "Invalid username or password");
 		},
 	});
 
 	const onSubmit: SubmitHandler<LoginInput> = (data) => mutation.mutate(data);
 
 	return (
-		<main className="flex min-h-screen items-center justify-center bg-gray-50 p-6">
-			<div className="w-full max-w-sm rounded-xl bg-white p-8 shadow-sm ring-1 ring-gray-200">
-				<h2 className="text-2xl font-bold text-gray-900">Login</h2>
+		<main className="flex min-h-screen items-center justify-center bg-[#09090b] p-6 antialiased">
+			<div className="w-full max-w-md rounded-2xl bg-zinc-900/40 p-10 shadow-2xl ring-1 ring-zinc-800/60 backdrop-blur-md">
+				<div className="space-y-2">
+					<h2 className="text-3xl font-bold tracking-tight text-zinc-100">
+						Welcome Back
+					</h2>
+					<p className="text-sm text-zinc-500">
+						Enter your credentials to access DeltaFlux.
+					</p>
+				</div>
+
 				{error && (
-					<p className="mt-4 text-sm text-red-600 font-medium">{error}</p>
+					<div className="mt-6 rounded-lg border border-rose-500/20 bg-rose-500/10 p-3 text-xs font-medium text-rose-400">
+						{error}
+					</div>
 				)}
 
-				<form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-					<div>
-						<label className="text-sm font-medium">Username</label>
+				<form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
+					<div className="space-y-1.5">
+						<label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+							Username
+						</label>
 						<input
 							{...register("username", { required: "Username is required" })}
-							className="mt-1 w-full rounded-lg border p-2 text-sm"
+							placeholder="marcel_dev"
+							className="w-full rounded-lg border border-zinc-800 bg-zinc-950 p-3 text-sm text-zinc-100 outline-none transition-all focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 placeholder:text-zinc-700"
 						/>
+						{errors.username && (
+							<p className="text-[10px] text-rose-500 uppercase font-bold tracking-tighter">
+								{errors.username.message}
+							</p>
+						)}
 					</div>
-					<div>
-						<label className="text-sm font-medium">Password</label>
+
+					<div className="space-y-1.5">
+						<label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+							Password
+						</label>
 						<input
 							type="password"
 							{...register("password", { required: "Password is required" })}
-							className="mt-1 w-full rounded-lg border p-2 text-sm"
+							placeholder="••••••••"
+							className="w-full rounded-lg border border-zinc-800 bg-zinc-950 p-3 text-sm text-zinc-100 outline-none transition-all focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 placeholder:text-zinc-700"
 						/>
+						{errors.password && (
+							<p className="text-[10px] text-rose-500 uppercase font-bold tracking-tighter">
+								{errors.password.message}
+							</p>
+						)}
 					</div>
+
 					<button
 						disabled={mutation.isPending}
-						className="w-full rounded-lg bg-black py-2 text-white hover:bg-gray-800 disabled:bg-gray-400"
+						className="w-full rounded-lg bg-zinc-100 py-3 text-sm font-bold text-black transition-all hover:bg-white disabled:bg-zinc-700 disabled:text-zinc-400"
 					>
-						{mutation.isPending ? "Logging in..." : "Login"}
+						{mutation.isPending ? "AUTHENTICATING..." : "LOGIN"}
 					</button>
 				</form>
-				<p className="mt-4 text-center text-sm">
-					New here?{" "}
-					<Link href="/register" className="font-bold underline">
-						Register
+
+				<p className="mt-8 text-center text-xs text-zinc-500">
+					Don&apos;t have an account?{" "}
+					<Link
+						href="/register"
+						className="font-bold text-zinc-100 underline decoration-zinc-700 underline-offset-4 hover:text-white transition-colors"
+					>
+						Create one
 					</Link>
 				</p>
 			</div>
