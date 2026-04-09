@@ -66,16 +66,16 @@ export default function CategoryForm({
 	});
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-			<div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl ring-1 ring-black/5">
+		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+			<div className="w-full max-w-md rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-8 shadow-2xl shadow-black/40">
 				<div className="flex items-center justify-between mb-6">
-					<h2 className="text-xl font-bold text-gray-900">
+					<h2 className="text-xl font-bold tracking-tight text-zinc-100">
 						{isEdit ? "Edit Category" : "New Category"}
 					</h2>
 					<button
 						type="button"
 						onClick={onClose}
-						className="text-gray-400 hover:text-gray-600"
+						className="text-zinc-500 transition-colors hover:text-zinc-200"
 					>
 						<X className="w-5 h-5" />
 					</button>
@@ -86,7 +86,7 @@ export default function CategoryForm({
 					className="space-y-4"
 				>
 					{/* Toggle Type */}
-					<div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-lg">
+					<div className="grid grid-cols-2 gap-2 rounded-lg border border-zinc-800/60 bg-zinc-950/50 p-1">
 						{(["income", "expense"] as const).map((t) => (
 							<label
 								key={t}
@@ -102,7 +102,7 @@ export default function CategoryForm({
 									disabled={isEdit} // Strict: Lock value pas Edit mode
 									className="peer hidden"
 								/>
-								<div className="text-center py-2 text-sm font-semibold rounded-md peer-checked:bg-white peer-checked:text-black peer-checked:shadow-sm text-gray-500 capitalize transition-all">
+								<div className="rounded-md py-2 text-center text-sm font-semibold capitalize text-zinc-500 transition-all peer-checked:bg-zinc-800 peer-checked:text-zinc-100 peer-checked:shadow-lg peer-checked:shadow-black/20">
 									{t}
 								</div>
 							</label>
@@ -114,17 +114,17 @@ export default function CategoryForm({
 							type="text"
 							placeholder="Category Name"
 							{...register("name", { required: "Name is required" })}
-							className="w-full rounded-lg border border-gray-200 p-3 text-sm focus:border-black outline-none transition-all"
+							className="w-full rounded-lg border border-zinc-800/60 bg-zinc-950/50 p-3 text-sm text-zinc-100 outline-none transition-all placeholder:text-zinc-500 focus:border-zinc-700"
 						/>
 						{errors.name && (
-							<p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
+							<p className="mt-1 text-xs text-rose-400">{errors.name.message}</p>
 						)}
 					</div>
 
 					<button
 						type="submit"
 						disabled={mutation.isPending}
-						className="w-full rounded-lg bg-black py-3.5 font-bold text-white hover:bg-gray-800 disabled:bg-gray-400 transition-all shadow-lg"
+						className="w-full rounded-lg border border-zinc-700 bg-zinc-100 py-3.5 font-bold text-zinc-900 transition-all hover:bg-zinc-200 disabled:border-zinc-800 disabled:bg-zinc-700 disabled:text-zinc-400"
 					>
 						{mutation.isPending
 							? "Processing..."

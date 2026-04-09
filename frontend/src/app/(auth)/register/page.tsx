@@ -8,10 +8,12 @@ import { RegisterInput, AuthResponse } from "@/types/auth";
 import Link from "next/link";
 import { useState } from "react";
 import { AxiosError } from "axios";
+import { ApiErrorResponse } from "@/types/api";
 
 export default function RegisterPage() {
 	const router = useRouter();
 	const [error, setError] = useState<string>("");
+
 	const {
 		register,
 		handleSubmit,
@@ -28,10 +30,13 @@ export default function RegisterPage() {
 		},
 		onSuccess: (res) => {
 			localStorage.setItem("token", res.data.token);
+			api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
 			router.push("/dashboard");
 		},
-		onError: (err: AxiosError<ApiResponse<null>>) => {
-			setError(err.response?.data?.message || "Registration failed");
+		onError: (err: AxiosError<ApiErrorResponse>) => {
+			setError(
+				err.response?.data?.message || "Registration failed. Please try again.",
+			);
 		},
 	});
 
@@ -39,75 +44,108 @@ export default function RegisterPage() {
 		mutation.mutate(data);
 
 	return (
-		<main className="flex min-h-screen items-center justify-center bg-gray-50 p-6">
-			<div className="w-full max-w-md rounded-xl bg-white p-8 shadow-sm ring-1 ring-gray-200">
-				<h2 className="text-2xl font-bold text-gray-900">Create Account</h2>
+		<main className="flex min-h-screen items-center justify-center bg-[#09090b] p-6 antialiased">
+			<div className="w-full max-w-md rounded-2xl bg-zinc-900/40 p-10 shadow-2xl ring-1 ring-zinc-800/60 backdrop-blur-md">
+				<div className="space-y-2">
+					<h2 className="text-3xl font-bold tracking-tight text-zinc-100">
+						Join DeltaFlux
+					</h2>
+					<p className="text-sm text-zinc-500">
+						Start tracking your financial flow with precision.
+					</p>
+				</div>
+
 				{error && (
-					<p className="mt-4 text-sm text-red-600 font-medium">{error}</p>
+					<div className="mt-6 rounded-lg border border-rose-500/20 bg-rose-500/10 p-3 text-xs font-medium text-rose-400">
+						{error}
+					</div>
 				)}
 
-				<form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-					<div>
-						<label className="text-sm font-medium">Full Name</label>
-						<input
-							{...register("name", { required: "Name is required" })}
-							className="mt-1 w-full rounded-lg border p-2 text-sm"
-						/>
-						{errors.name && (
-							<span className="text-xs text-red-500">
-								{errors.name.message}
-							</span>
-						)}
+				<form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4">
+					{/* Full Name & Username in Grid for compact feel */}
+					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+						<div className="space-y-1.5">
+							<label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+								Full Name
+							</label>
+							<input
+								{...register("name", { required: "Name is required" })}
+								placeholder="Marcel"
+								className="w-full rounded-lg border border-zinc-800 bg-zinc-950 p-3 text-sm text-zinc-100 outline-none transition-all focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 placeholder:text-zinc-800"
+							/>
+							{errors.name && (
+								<p className="text-[10px] text-rose-500 font-bold uppercase tracking-tighter">
+									{errors.name.message}
+								</p>
+							)}
+						</div>
+
+						<div className="space-y-1.5">
+							<label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+								Username
+							</label>
+							<input
+								{...register("username", { required: "Username is required" })}
+								placeholder="marcel_dev"
+								className="w-full rounded-lg border border-zinc-800 bg-zinc-950 p-3 text-sm text-zinc-100 outline-none transition-all focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 placeholder:text-zinc-800"
+							/>
+							{errors.username && (
+								<p className="text-[10px] text-rose-500 font-bold uppercase tracking-tighter">
+									{errors.username.message}
+								</p>
+							)}
+						</div>
 					</div>
-					<div>
-						<label className="text-sm font-medium">Username</label>
-						<input
-							{...register("username", { required: "Username is required" })}
-							className="mt-1 w-full rounded-lg border p-2 text-sm"
-						/>
-						{errors.username && (
-							<span className="text-xs text-red-500">
-								{errors.username.message}
-							</span>
-						)}
-					</div>
-					<div>
-						<label className="text-sm font-medium">Email</label>
+
+					<div className="space-y-1.5">
+						<label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+							Email Address
+						</label>
 						<input
 							type="email"
 							{...register("email", { required: "Email is required" })}
-							className="mt-1 w-full rounded-lg border p-2 text-sm"
+							placeholder="marcel@example.com"
+							className="w-full rounded-lg border border-zinc-800 bg-zinc-950 p-3 text-sm text-zinc-100 outline-none transition-all focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 placeholder:text-zinc-800"
 						/>
 						{errors.email && (
-							<span className="text-xs text-red-500">
+							<p className="text-[10px] text-rose-500 font-bold uppercase tracking-tighter">
 								{errors.email.message}
-							</span>
+							</p>
 						)}
 					</div>
-					<div>
-						<label className="text-sm font-medium">Password</label>
+
+					<div className="space-y-1.5">
+						<label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+							Password
+						</label>
 						<input
 							type="password"
 							{...register("password", { required: "Password is required" })}
-							className="mt-1 w-full rounded-lg border p-2 text-sm"
+							placeholder="••••••••"
+							className="w-full rounded-lg border border-zinc-800 bg-zinc-950 p-3 text-sm text-zinc-100 outline-none transition-all focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 placeholder:text-zinc-800"
 						/>
 						{errors.password && (
-							<span className="text-xs text-red-500">
+							<p className="text-[10px] text-rose-500 font-bold uppercase tracking-tighter">
 								{errors.password.message}
-							</span>
+							</p>
 						)}
 					</div>
+
 					<button
 						disabled={mutation.isPending}
-						className="w-full rounded-lg bg-black py-2 text-white hover:bg-gray-800 disabled:bg-gray-400"
+						className="w-full mt-4 rounded-lg bg-zinc-100 py-3 text-sm font-bold text-black transition-all hover:bg-white disabled:bg-zinc-700 disabled:text-zinc-400"
 					>
-						{mutation.isPending ? "Processing..." : "Register"}
+						{mutation.isPending ? "CREATING ACCOUNT..." : "CREATE ACCOUNT"}
 					</button>
 				</form>
-				<p className="mt-4 text-center text-sm">
-					Have an account?{" "}
-					<Link href="/login" className="font-bold underline">
-						Login
+
+				<p className="mt-8 text-center text-xs text-zinc-500">
+					Already have an account?{" "}
+					<Link
+						href="/login"
+						className="font-bold text-zinc-100 underline decoration-zinc-700 underline-offset-4 hover:text-white transition-colors"
+					>
+						Login here
 					</Link>
 				</p>
 			</div>
