@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/axios";
 import { X } from "lucide-react";
@@ -26,12 +26,19 @@ export default function CategoryForm({
 		register,
 		handleSubmit,
 		reset,
+		control,
 		formState: { errors },
 	} = useForm<CreateCategoryInput>({
 		defaultValues: {
 			name: initialData?.name || "",
 			type: initialData?.type || "expense",
 		},
+	});
+
+	const currentType = useWatch({
+		control,
+		name: "type",
+		defaultValue: initialData?.type || "expense",
 	});
 
 	// Reset form pas data berubah (penting buat mode edit)
@@ -85,13 +92,18 @@ export default function CategoryForm({
 					onSubmit={handleSubmit((data) => mutation.mutate(data))}
 					className="space-y-4"
 				>
-					{/* Toggle Type */}
-					<div className="grid grid-cols-2 gap-2 rounded-lg border border-zinc-800/60 bg-zinc-950/50 p-1">
+					{/* Toggle Type Container */}
+					<div
+						className={clsx(
+							"grid grid-cols-2 gap-2 rounded-xl p-1.5 transition-colors duration-300",
+							currentType === "income" ? "bg-emerald-500/5" : "bg-rose-500/5",
+						)}
+					>
 						{(["income", "expense"] as const).map((t) => (
 							<label
 								key={t}
 								className={clsx(
-									"cursor-pointer",
+									"relative cursor-pointer",
 									isEdit && "cursor-not-allowed opacity-60", // Visual feedback kalau disabled
 								)}
 							>
@@ -102,7 +114,16 @@ export default function CategoryForm({
 									disabled={isEdit} // Strict: Lock value pas Edit mode
 									className="peer hidden"
 								/>
-								<div className="rounded-md py-2 text-center text-sm font-semibold capitalize text-zinc-500 transition-all peer-checked:bg-zinc-800 peer-checked:text-zinc-100 peer-checked:shadow-lg peer-checked:shadow-black/20">
+								<div
+									className={clsx(
+										"relative z-10 rounded-lg py-2.5 text-center text-[10px] font-bold uppercase tracking-widest transition-all duration-300",
+										"text-zinc-500 hover:text-zinc-300",
+										// Custom peer-checked styles based on type
+										t === "income"
+											? "peer-checked:bg-emerald-500/10 peer-checked:text-emerald-400 peer-checked:shadow-[inset_0_0_0_1px_rgba(16,185,129,0.2)]"
+											: "peer-checked:bg-rose-500/10 peer-checked:text-rose-400 peer-checked:shadow-[inset_0_0_0_1px_rgba(244,63,94,0.2)]",
+									)}
+								>
 									{t}
 								</div>
 							</label>
@@ -114,17 +135,19 @@ export default function CategoryForm({
 							type="text"
 							placeholder="Category Name"
 							{...register("name", { required: "Name is required" })}
-							className="w-full rounded-lg border border-zinc-800/60 bg-zinc-950/50 p-3 text-sm text-zinc-100 outline-none transition-all placeholder:text-zinc-500 focus:border-zinc-700"
+							className="w-full rounded-lg border border-zinc-800/60 bg-zinc-950/50 p-4 text-sm text-zinc-100 outline-none transition-all placeholder:text-zinc-500 focus:border-zinc-700"
 						/>
 						{errors.name && (
-							<p className="mt-1 text-xs text-rose-400">{errors.name.message}</p>
+							<p className="mt-1 text-xs text-rose-400">
+								{errors.name.message}
+							</p>
 						)}
 					</div>
 
 					<button
 						type="submit"
 						disabled={mutation.isPending}
-						className="w-full rounded-lg border border-zinc-700 bg-zinc-100 py-3.5 font-bold text-zinc-900 transition-all hover:bg-zinc-200 disabled:border-zinc-800 disabled:bg-zinc-700 disabled:text-zinc-400"
+						className="w-full rounded-lg border border-zinc-700 bg-zinc-100 py-3.5 font-bold text-zinc-900 transition-all hover:bg-zinc-200 hover:scale-[1.02] active:scale-[0.98] disabled:border-zinc-800 disabled:bg-zinc-700 disabled:text-zinc-400 "
 					>
 						{mutation.isPending
 							? "Processing..."

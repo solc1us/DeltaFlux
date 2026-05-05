@@ -81,7 +81,12 @@ export default function TransactionForm({ onClose }: { onClose: () => void }) {
 					className="space-y-4"
 				>
 					{/* Toggle Type */}
-					<div className="grid grid-cols-2 gap-2 rounded-lg border border-zinc-800/60 bg-zinc-950/50 p-1">
+					<div
+						className={clsx(
+							"grid grid-cols-2 gap-2 rounded-xl p-1.5 transition-colors duration-300",
+							selectedType === "income" ? "bg-emerald-500/5" : "bg-rose-500/5",
+						)}
+					>
 						{["income", "expense"].map((t) => (
 							<label key={t} className="cursor-pointer">
 								<input
@@ -90,7 +95,16 @@ export default function TransactionForm({ onClose }: { onClose: () => void }) {
 									{...register("type")}
 									className="peer hidden"
 								/>
-								<div className="rounded-md py-2 text-center text-sm font-semibold capitalize text-zinc-500 transition-all peer-checked:bg-zinc-800 peer-checked:text-zinc-100 peer-checked:shadow-lg peer-checked:shadow-black/20">
+								<div
+									className={clsx(
+										"rounded-lg py-2.5 text-center text-[10px] font-bold uppercase tracking-widest transition-all duration-300",
+										"text-zinc-500 hover:text-zinc-300",
+										// Custom peer-checked styles
+										t === "income"
+											? "peer-checked:bg-emerald-500/10 peer-checked:text-emerald-400 peer-checked:shadow-[inset_0_0_0_1px_rgba(16,185,129,0.2)]"
+											: "peer-checked:bg-rose-500/10 peer-checked:text-rose-400 peer-checked:shadow-[inset_0_0_0_1px_rgba(244,63,94,0.2)]",
+									)}
+								>
 									{t}
 								</div>
 							</label>
@@ -102,13 +116,13 @@ export default function TransactionForm({ onClose }: { onClose: () => void }) {
 						type="number"
 						placeholder="0"
 						{...register("amount", { required: true, valueAsNumber: true })}
-						className="w-full rounded-lg border border-zinc-800/60 bg-zinc-950/50 p-3 text-lg font-bold text-zinc-100 outline-none transition-all placeholder:text-zinc-500 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
+						className="w-full rounded-lg border border-zinc-800/60 bg-zinc-950/50 p-4 text-lg font-bold text-zinc-100 outline-none transition-all placeholder:text-zinc-500 focus:border-zinc-700 focus:ring-1 focus:ring-zinc-700"
 					/>
 
 					{/* Dropdown Category */}
 					<select
 						{...register("category_id", { required: true })}
-						className="w-full rounded-lg border border-zinc-800/60 bg-zinc-950/50 p-3 text-sm text-zinc-100 outline-none focus:border-zinc-700"
+						className="w-full rounded-lg border border-zinc-800/60 bg-zinc-950/50 p-4 text-sm text-zinc-100 outline-none focus:border-zinc-700"
 						disabled={catLoading}
 					>
 						<option value="">Select Category</option>
