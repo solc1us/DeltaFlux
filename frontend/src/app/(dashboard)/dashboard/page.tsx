@@ -13,81 +13,91 @@ const ExpenseChart = dynamic(
 	{
 		ssr: false,
 		loading: () => (
-			<div className="h-[350px] w-full animate-pulse bg-gray-50 rounded-2xl" />
+			<div className="h-[350px] w-full animate-pulse rounded-2xl border border-zinc-800/60 bg-zinc-900/40" />
 		),
 	},
 );
 
 export default function DashboardPage() {
-	// 1. Gunakan Generic Type pada api.get dan useQuery
+	// 1. Dapatkan bulan dan tahun saat ini
+	const now = new Date();
+	const currentMonth = now.getMonth() + 1; // 1-12
+	const currentYear = now.getFullYear();
+
 	// Query 1: Summary Stats
 	const { data: summaryData, isLoading: isSummaryLoading } = useQuery({
-		queryKey: ["summary", 3, 2026],
+		// 2. Gunakan variabel di Query Key agar reaktif
+		queryKey: ["summary", currentMonth, currentYear],
 		queryFn: async () => {
+			// 3. Gunakan Template Literals buat inject ke URL
 			const res = await api.get<ApiResponse<SummaryData>>(
-				"/analytics/summary?month=3&year=2026",
+				`/analytics/summary?month=${currentMonth}&year=${currentYear}`,
 			);
 			return res.data.data;
 		},
 	});
 
-	// Query 2: Category Deviation (Real Data, No Mock)
+	// Query 2: Category Deviation
 	const { data: deviationData, isLoading: isDeviationLoading } = useQuery({
-		queryKey: ["deviations", 3, 2026],
+		queryKey: ["deviations", currentMonth, currentYear],
 		queryFn: async () => {
 			const res = await api.get<ApiResponse<DeviationResponse>>(
-				"/analytics/category-deviation?month=3&year=2026",
+				`/analytics/category-deviation?month=${currentMonth}&year=${currentYear}`,
 			);
 			return res.data.data;
 		},
 	});
-
-	if (isSummaryLoading || isDeviationLoading) {
-		return (
-			<div className="p-8 text-gray-400 animate-pulse font-medium">
-				Analyzing deviations...
-			</div>
-		);
-	}
 
 	return (
 		<AuthGuard>
 			<div className="max-w-6xl space-y-8">
 				<header>
-					<h1 className="text-3xl font-bold tracking-tight text-gray-900">
+					<h1 className="text-3xl font-bold tracking-tight text-zinc-100">
 						Overview
 					</h1>
-					<p className="text-gray-500">March 2026 Financial Insight.</p>
+					<p className="text-sm text-zinc-500">
+						{now.toLocaleDateString("en-US", {
+							month: "long",
+							year: "numeric",
+						})}{" "}
+						Financial Insight.
+					</p>
 				</header>
 
 				{/* Stats Section */}
 				<div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+					{/* Kita passing isLoading ke StatsCard */}
 					<StatsCard
 						title="Total Income"
-						amount={summaryData?.current.income ?? 0}
-						growth={summaryData?.analysis.income_growth}
+						amount={summaryData?.current?.income ?? 0}
+						growth={summaryData?.analysis?.income_growth}
 						type="income"
+						isLoading={isSummaryLoading}
 					/>
 					<StatsCard
 						title="Total Expense"
-						amount={summaryData?.current.expense ?? 0}
-						growth={summaryData?.analysis.expense_growth}
+						amount={summaryData?.current?.expense ?? 0}
+						growth={summaryData?.analysis?.expense_growth}
 						type="expense"
+						isLoading={isSummaryLoading}
 					/>
 					<StatsCard
 						title="Net Balance"
-						amount={summaryData?.current.balance ?? 0}
+						amount={summaryData?.current?.balance ?? 0}
+						isLoading={isSummaryLoading}
 					/>
 				</div>
 
-				{/* Analytics Section */}
 				<div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 					<div className="lg:col-span-2">
-						<ExpenseChart data={[]} /> {/* Sementara kosong sampai Phase 5 */}
+						{/* Chart loading ditangani via dynamic import di atas */}
+						<ExpenseChart data={[]} />
 					</div>
 					<div className="lg:col-span-1">
-						{/* Kirim data asli dari API ke komponen */}
-						<DeviationList deviations={deviationData?.deviations ?? []} />
+						<DeviationList
+							deviations={deviationData?.deviations ?? []}
+							isLoading={isDeviationLoading} // Passing ke DeviationList
+						/>
 					</div>
 				</div>
 			</div>

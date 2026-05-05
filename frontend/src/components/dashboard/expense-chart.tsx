@@ -15,7 +15,7 @@ interface Props {
 	data: { category: string; amount: number }[];
 }
 
-const COLORS = ["#000000", "#4B5563", "#9CA3AF", "#D1D5DB", "#E5E7EB"];
+const COLORS = ["#10b981", "#38bdf8", "#f59e0b", "#a78bfa", "#f43f5e"];
 
 export default function ExpenseChart({ data }: Props) {
 	const formatCurrency = (val: number) =>
@@ -26,8 +26,8 @@ export default function ExpenseChart({ data }: Props) {
 		}).format(val);
 
 	return (
-		<div className="h-[350px] w-full rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-			<h3 className="mb-6 text-lg font-bold text-gray-900">
+		<div className="h-[350px] w-full rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-6 shadow-sm transition-all duration-300 hover:border-zinc-700 hover:shadow-2xl hover:shadow-black/40">
+			<h3 className="mb-6 text-lg font-semibold tracking-tight text-zinc-100">
 				Expense by Category
 			</h3>
 			<div className="h-[280px] w-full">
@@ -39,26 +39,28 @@ export default function ExpenseChart({ data }: Props) {
 						<CartesianGrid
 							strokeDasharray="3 3"
 							vertical={false}
-							stroke="#F3F4F6"
+							stroke="#27272a"
 						/>
 						<XAxis
 							dataKey="category"
 							axisLine={false}
 							tickLine={false}
-							tick={{ fill: "#9CA3AF", fontSize: 12 }}
+							tick={{ fill: "#71717a", fontSize: 12 }}
 						/>
 						<YAxis
 							axisLine={false}
 							tickLine={false}
-							tick={{ fill: "#9CA3AF", fontSize: 12 }}
+							tick={{ fill: "#71717a", fontSize: 12 }}
 							tickFormatter={formatCurrency}
 						/>
 						<Tooltip
-							cursor={{ fill: "#F9FAFB" }}
+							cursor={{ fill: "#18181b" }}
 							contentStyle={{
 								borderRadius: "12px",
-								border: "none",
-								boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+								border: "1px solid rgb(63 63 70 / 0.7)",
+								backgroundColor: "rgb(24 24 27 / 0.95)",
+								color: "#f4f4f5",
+								boxShadow: "0 25px 50px -12px rgb(0 0 0 / 0.6)",
 							}}
 							formatter={(value: unknown) => {
 								const numericValue =

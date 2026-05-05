@@ -28,12 +28,16 @@ export default function TransactionPage() {
 				{/* 1. Header Section */}
 				<div className="flex items-center justify-between">
 					<div>
-						<h1 className="text-3xl font-bold tracking-tight">Transactions</h1>
-						<p className="text-gray-500">Manage and monitor your cash flow.</p>
+						<h1 className="text-3xl font-bold tracking-tight text-zinc-100">
+							Transactions
+						</h1>
+						<p className="text-sm text-zinc-500">
+							Manage and monitor your cash flow.
+						</p>
 					</div>
 					<button
 						onClick={() => setIsModalOpen(true)}
-						className="flex items-center gap-2 rounded-lg bg-black px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 transition-all shadow-sm"
+						className="flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-100/95 px-4 py-2.5 text-sm font-semibold text-zinc-900 transition-all hover:bg-zinc-200"
 					>
 						<Plus className="w-4 h-4" />
 						Add Transaction
@@ -42,10 +46,13 @@ export default function TransactionPage() {
 
 				{/* 2. Table Section */}
 				{isLoading ? (
-					<div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white">
-						<p className="text-sm text-gray-400 animate-pulse">
-							Fetching records...
-						</p>
+					<div className="flex h-64 items-center justify-center rounded-2xl border border-zinc-800/60 bg-zinc-900/40">
+						<div className="space-y-2 text-center">
+							<div className="mx-auto h-2 w-24 animate-pulse rounded-full bg-zinc-800" />
+							<p className="text-xs uppercase tracking-widest text-zinc-500">
+								Fetching records...
+							</p>
+						</div>
 					</div>
 				) : (
 					<TransactionTable transactions={data?.transactions || []} />

@@ -21,7 +21,7 @@ export const updateCategorySchema = z.object({
 	}),
 	body: z.object({
 		name: z.string().trim().min(1).max(50).optional(),
-		type: z.enum(["income", "expense"]).optional(),
+		type: z.enum(TRANSACTION_TYPES).optional(),
 	}),
 });
 
